@@ -69,10 +69,6 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 # FastAPI ingest server URL
 VITE_INGEST_API_URL=http://localhost:8000
 
-# Supabase (backend / Python)
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-service-role-key
-
 # Allowed CORS origins for the FastAPI server
 CORS_ORIGINS=http://localhost:5173
 ```
