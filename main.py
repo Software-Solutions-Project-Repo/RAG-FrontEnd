@@ -9,7 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import SupabaseVectorStore
 from langchain_core.documents import Document
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from supabase import create_client
 
@@ -175,6 +174,7 @@ async def ingest(
 
     # Embed and upload via SupabaseVectorStore (same as populate_database.py)
     try:
+        from langchain_huggingface import HuggingFaceEmbeddings
         embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)
         supabase = _supabase_client()
         SupabaseVectorStore.from_documents(
@@ -231,6 +231,7 @@ async def ingest_chunks(
         raise HTTPException(status_code=422, detail="All chunks are empty after editing")
 
     try:
+        from langchain_huggingface import HuggingFaceEmbeddings
         embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)
         supabase = _supabase_client()
         SupabaseVectorStore.from_documents(
