@@ -10,11 +10,11 @@ The backend chatbot (`LLM.py`) uses Google Gemini + Supabase vector search to an
 
 This admin panel manages the vector database used by the RAG backend (`[text](https://github.com/Software-Solutions-Project-Repo/langchain-rag.git)`), which consists of:
 
-| Script | Purpose |
-|---|---|
+| Script                 | Purpose                                         |
+| ---------------------- | ----------------------------------------------- |
 | `populate_database.py` | CLI tool — PDF → chunks → embeddings → Supabase |
-| `query_data.py` | Semantic similarity search against Supabase |
-| `LLM.py` | Interactive payroll chatbot (Gemini + RAG) |
+| `query_data.py`        | Semantic similarity search against Supabase     |
+| `LLM.py`               | Interactive payroll chatbot (Gemini + RAG)      |
 
 The admin panel replaces `populate_database.py` for day-to-day document management — providing a UI to upload PDFs, review and edit chunks before saving, and delete stale entries.
 
@@ -22,13 +22,13 @@ The admin panel replaces `populate_database.py` for day-to-day document manageme
 
 ## Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 18 + Vite + TailwindCSS |
-| Router | React Router v6 |
-| Auth & DB | Supabase (`@supabase/supabase-js`) |
-| Ingest API | FastAPI (Python) |
-| Embeddings | `sentence-transformers/all-MiniLM-L6-v2` via LangChain |
+| Layer       | Technology                                                 |
+| ----------- | ---------------------------------------------------------- |
+| Frontend    | React 18 + Vite + TailwindCSS                              |
+| Router      | React Router v6                                            |
+| Auth & DB   | Supabase (`@supabase/supabase-js`)                         |
+| Ingest API  | FastAPI (Python)                                           |
+| Embeddings  | `sentence-transformers/all-MiniLM-L6-v2` via LangChain     |
 | PDF parsing | LangChain `PyPDFLoader` + `RecursiveCharacterTextSplitter` |
 
 ---
@@ -104,11 +104,11 @@ curl http://localhost:8000/health
 
 ## API Endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/health` | Health check |
-| `POST` | `/preview` | Extract and chunk a PDF — returns chunks, no saving |
-| `POST` | `/ingest` | Full pipeline: chunk → embed → save to Supabase |
+| Method | Path             | Description                                          |
+| ------ | ---------------- | ---------------------------------------------------- |
+| `GET`  | `/health`        | Health check                                         |
+| `POST` | `/preview`       | Extract and chunk a PDF — returns chunks, no saving  |
+| `POST` | `/ingest`        | Full pipeline: chunk → embed → save to Supabase      |
 | `POST` | `/ingest-chunks` | Embed and save pre-edited chunks (skips re-chunking) |
 
 ### `/preview` — request
@@ -157,21 +157,36 @@ These tables are shared with the RAG backend — any documents uploaded here are
 
 ### `documents`
 
-| Column | Type | Description |
-|---|---|---|
-| `id` | `uuid` | Primary key |
-| `content` | `text` | Chunk text |
-| `metadata` | `jsonb` | `{source, chunk_id, document_name, page}` |
-| `embedding` | `vector(384)` | HuggingFace 384-dim embedding |
-| `created_at` | `timestamptz` | Auto-set |
+| Column       | Type          | Description                               |
+| ------------ | ------------- | ----------------------------------------- |
+| `id`         | `uuid`        | Primary key                               |
+| `content`    | `text`        | Chunk text                                |
+| `metadata`   | `jsonb`       | `{source, chunk_id, document_name, page}` |
+| `embedding`  | `vector(384)` | HuggingFace 384-dim embedding             |
+| `created_at` | `timestamptz` | Auto-set                                  |
 
 ### `document_registry`
 
 Master table tracking ingested documents (source, chunk count, timestamp).
+
+### `question_bank`
+
+| Column       | Type          | Description                               |
+| ------------ | ------------- | ----------------------------------------- |
+| `id`         | `uuid`        | Primary key                               |
+| `question`    | `text`       | Question text                            |
+| `answer`    | `text`         | Suggested answer to question               |
+| `category`    | `text`       | Question category (e.g. Employee Setup, Payroll Processing)  |
+| `metadata`   | `jsonb`       | `NULL`                                    |
+| `embedding`  | `vector(384)` | HuggingFace 384-dim embedding             |
+| `created_at` | `timestamptz` | Auto-set                                  |
+
+### `question_bank_registry`
+
+Master table tracking ingested questions (question, chunk count, timestamp).
 
 ---
 
 ## Author
 
 Henry Sylvester — INFO 3601, University of the West Indies, St. Augustine (2026)
-
