@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { embedQuestion } from '../lib/embeddings'
 
 export default function EditQuestion() {
   const navigate = useNavigate()
@@ -64,6 +65,13 @@ export default function EditQuestion() {
     if (error) {
       setError(error.message)
     } else {
+      await embedQuestion({
+        id,
+        question,
+        answer,
+        metadata: parsedMetadata
+      })
+
       navigate('/question-bank')
     }
 
