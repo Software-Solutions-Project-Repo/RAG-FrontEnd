@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { embedQuestion } from '../lib/embeddings'
 
 export default function NewQuestion() {
   const navigate = useNavigate()
@@ -28,7 +29,7 @@ export default function NewQuestion() {
       return
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('question_bank')
       .insert([
         {
@@ -37,10 +38,19 @@ export default function NewQuestion() {
           metadata: parsedMetadata
         }
       ])
+      .select()
+      .single()
 
     if (error) {
       setError(error.message)
     } else {
+      await embedQuestion({
+        id: data.id,
+        question,
+        answer,
+        metadata: parsedMetadata
+      })
+
       navigate('/question-bank')
     }
 
