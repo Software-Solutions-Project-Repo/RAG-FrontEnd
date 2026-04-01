@@ -6,6 +6,8 @@ import Login from './pages/Login'
 import Documents from './pages/Documents'
 import DocumentForm from './pages/DocumentForm'
 import Search from './pages/Search'
+import ErrorCode from './pages/ErrorCode'
+import AddErrorRow from './pages/AddErrorRow'
 
 
 function App() {
@@ -83,6 +85,9 @@ function App() {
           <Route path="documents/new" element={<DocumentForm />} />
           <Route path="documents/:id/edit" element={<DocumentForm />} />
           <Route path="search" element={<Search />} />
+          
+          <Route path = "/error-codes" element={<ErrorCode/>}/>
+           <Route path="/error-codes/new" element={<AddErrorRow />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

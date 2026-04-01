@@ -250,3 +250,43 @@ async def ingest_chunks(
         "table": DOCUMENTS_TABLE,
         "source": document_name,
     }
+@app.post("/embed-error")
+async def embed_error  (payload:dict):
+
+    """ Create embedding for the error code + description + question and stores it"""
+
+    error_code = payload.get("error_code")
+    description = payload.get("description", "")
+    question = payload.get("question")
+    answer = payload.get("answer")
+
+    if not error_code or not question:
+        raise HTTPException(status_code = 400, detail = "Missing required fields ")
+    text_to_embed = f"{error_code} {description} {question}"
+    try:
+        from langchain_huggingface import HuggingFaceEmbeddings
+        embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)
+        vector = embeddings.embed_query(text_to_embed)
+        supabase = _supabase_client()
+
+        code_res = supabase.table("error_codes").insert({
+            "error_code": error_code, 
+            "description": description,
+           
+        }).execute()
+
+        code_id = code_res.data[0]["id"]
+
+        supabase.table("error_code_qa").insert({
+            "error_code_id": code_id, 
+            "error_code": error_code,
+            "question": question,
+            "answer": answer,
+            "embedding":vector,
+        }).execute() 
+
+        return{"embedding" : vector}
+    
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail = str(e))
+
