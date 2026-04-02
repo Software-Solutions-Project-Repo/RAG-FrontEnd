@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import SupabaseVectorStore
 from langchain_core.documents import Document
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from supabase import create_client
 
@@ -27,7 +28,7 @@ app = FastAPI(title="RAG Ingest API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(","),
-    allow_methods=["POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -174,7 +175,6 @@ async def ingest(
 
     # Embed and upload via SupabaseVectorStore (same as populate_database.py)
     try:
-        from langchain_huggingface import HuggingFaceEmbeddings
         embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)
         supabase = _supabase_client()
         SupabaseVectorStore.from_documents(
@@ -231,7 +231,6 @@ async def ingest_chunks(
         raise HTTPException(status_code=422, detail="All chunks are empty after editing")
 
     try:
-        from langchain_huggingface import HuggingFaceEmbeddings
         embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)
         supabase = _supabase_client()
         SupabaseVectorStore.from_documents(
@@ -290,3 +289,97 @@ async def embed_error  (payload:dict):
     except Exception as e:
         raise HTTPException(status_code = 500, detail = str(e))
 
+
+
+@app.post("/embed-question")
+async def embed_question(payload: dict):
+    """
+    Embed a single question + answer and store in Supabase question_bank table
+    """
+
+    question = payload.get("question")
+    answer = payload.get("answer")
+    metadata = payload.get("metadata", {})
+    row_id = payload.get("id")
+
+    if not question or not answer:
+        raise HTTPException(status_code=400, detail="Missing question or answer")
+
+    text = f"""
+Category: {metadata} 
+
+Question: 
+{question}
+
+Answer: 
+{answer}
+"""
+
+    print("Generating embeddings...")
+    
+    try:
+        embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)
+        vector = embeddings.embed_query(text)  
+        print("Embedding length: ", len(vector))  
+
+        supabase = _supabase_client()
+        print("Updating row: ", row_id)
+
+        response = supabase.table("question_bank").update({
+            "embedding": vector
+        }).eq("id", row_id).execute()
+
+    except Exception as e:
+        print("ERROR: ", str(e))
+        raise HTTPException(status_code=500, detail=f"Embedding/Database error: {str(e)}")
+    
+    return{
+        "status": "embedded",
+        "id": row_id
+    }
+
+@app.post("/embed-missing-questions")
+async def embed_missing_questions():
+    """
+    Generate embeddings for rows missing embeddings
+    """
+
+    supabase = _supabase_client()
+
+    rows = (
+        supabase.table("question_bank").select("*").is_("embedding", "null").execute()
+    )
+
+    data = rows.data or []
+
+    if not data:
+        return {"embedded": 0}
+
+
+    for row in data:
+        text = f"""
+Category: {row.get('metadata')}
+
+Question:
+{row.get('question')}
+
+Answer:
+{row.get('answer')}
+"""
+    print("Generating embeddings...")
+    
+    try:
+        embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)    
+        vector = embeddings.embed_query(text)
+
+        response = supabase.table("question_bank").update({
+            "embedding": vector
+        }).eq("id", row["id"]).execute()
+    
+    except Exception as e:
+        print("ERROR: ", str(e))
+        raise HTTPException(status_code=500, detail=f"Embedding/Database error: {str(e)}")
+
+    return{
+        "embedded": len(data)
+    }

@@ -1,6 +1,6 @@
 # RAG Manager — Admin Panel
 
-A React-based admin UI for managing the document knowledge base that powers a **LangChain RAG payroll chatbot** (INFO 3601 — University of the West Indies, St. Augustine).
+A React-based admin UI for managing the document knowledge base that powers a **LangChain RAG payroll chatbot** (INFO 3604 — University of the West Indies, St. Augustine).
 
 The backend chatbot (`LLM.py`) uses Google Gemini + Supabase vector search to answer payroll-related questions about PowPay. This admin panel is what you use to upload, chunk, review, and manage the documents stored in that Supabase vector database.
 
@@ -10,11 +10,11 @@ The backend chatbot (`LLM.py`) uses Google Gemini + Supabase vector search to an
 
 This admin panel manages the vector database used by the RAG backend (`[text](https://github.com/Software-Solutions-Project-Repo/langchain-rag.git)`), which consists of:
 
-| Script | Purpose |
-|---|---|
+| Script                 | Purpose                                         |
+| ---------------------- | ----------------------------------------------- |
 | `populate_database.py` | CLI tool — PDF → chunks → embeddings → Supabase |
-| `query_data.py` | Semantic similarity search against Supabase |
-| `LLM.py` | Interactive payroll chatbot (Gemini + RAG) |
+| `query_data.py`        | Semantic similarity search against Supabase     |
+| `LLM.py`               | Interactive payroll chatbot (Gemini + RAG)      |
 
 The admin panel replaces `populate_database.py` for day-to-day document management — providing a UI to upload PDFs, review and edit chunks before saving, and delete stale entries.
 
@@ -22,13 +22,13 @@ The admin panel replaces `populate_database.py` for day-to-day document manageme
 
 ## Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 18 + Vite + TailwindCSS |
-| Router | React Router v6 |
-| Auth & DB | Supabase (`@supabase/supabase-js`) |
-| Ingest API | FastAPI (Python) |
-| Embeddings | `sentence-transformers/all-MiniLM-L6-v2` via LangChain |
+| Layer       | Technology                                                 |
+| ----------- | ---------------------------------------------------------- |
+| Frontend    | React 18 + Vite + TailwindCSS                              |
+| Router      | React Router v6                                            |
+| Auth & DB   | Supabase (`@supabase/supabase-js`)                         |
+| Ingest API  | FastAPI (Python)                                           |
+| Embeddings  | `sentence-transformers/all-MiniLM-L6-v2` via LangChain     |
 | PDF parsing | LangChain `PyPDFLoader` + `RecursiveCharacterTextSplitter` |
 
 ---
@@ -49,9 +49,13 @@ The admin panel replaces `populate_database.py` for day-to-day document manageme
 │   ├── pages/
 │   │   ├── Documents.jsx    # Document list with pagination
 │   │   ├── DocumentForm.jsx # Upload + chunk preview/edit
+│   │   ├── QuestionBank.jsx # List of Common Questions and Suggested Answers
+│   │   ├── NewQuestion.jsx  # Add new questions and preview
+│   │   ├── EditQuestion.jsx # Edit Questions + regenerate embeddings automatically
 │   │   ├── Search.jsx       # Semantic search UI
 │   │   └── Login.jsx
 │   └── lib/
+│       ├── embeddings.js    # Embedding function
 │       └── supabase.js      # Supabase client
 ```
 
@@ -104,12 +108,14 @@ curl http://localhost:8000/health
 
 ## API Endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/health` | Health check |
-| `POST` | `/preview` | Extract and chunk a PDF — returns chunks, no saving |
-| `POST` | `/ingest` | Full pipeline: chunk → embed → save to Supabase |
-| `POST` | `/ingest-chunks` | Embed and save pre-edited chunks (skips re-chunking) |
+| Method | Path                       | Description                                           |
+| ------ | ---------------------------| ------------------------------------------------------|
+| `GET`  | `/health`                  | Health check                                          |
+| `POST` | `/preview`                 | Extract and chunk a PDF — returns chunks, no saving   |
+| `POST` | `/ingest`                  | Full pipeline: chunk → embed → save to Supabase       |
+| `POST` | `/ingest-chunks`           | Embed and save pre-edited chunks (skips re-chunking)  |
+| `POST` | `/embed-question`          | Embed and save question + suggested answer to Supabase|
+| `POST` | `/embed-missing-questions` | Regenerate missing embeddings                           |
 
 ### `/preview` — request
 
@@ -140,7 +146,7 @@ chunks: "[{\"index\": 0, \"page\": 0, \"text\": \"...\"}]"
 
 ---
 
-## Upload Flow
+## Document Upload Flow
 
 1. Drag-and-drop or click to select a file (`.pdf`, `.txt`, `.md`, `.csv`, `.json`)
 2. **PDF files**: sent to `/preview` → chunks displayed as editable cards
@@ -149,7 +155,15 @@ chunks: "[{\"index\": 0, \"page\": 0, \"text\": \"...\"}]"
    - Click **Save to Database** → sends edited chunks to `/ingest-chunks`
 3. **Text files**: content previewed in read-only textarea → saved directly to Supabase
 
----
+
+## Question Bank Upload Flow
+
+1. Click **Add Question** to add a new question bank entry.
+2. Fill out all necessary fields:
+   - `Question`
+   - `Suggested Answer`
+   - `Metadata (optional)` `(e.g. {'category':'Payroll Processing'} ) `
+3. Click **Create Question** to upload question to Supabase.
 
 ## Supabase Tables
 
@@ -157,21 +171,32 @@ These tables are shared with the RAG backend — any documents uploaded here are
 
 ### `documents`
 
-| Column | Type | Description |
-|---|---|---|
-| `id` | `uuid` | Primary key |
-| `content` | `text` | Chunk text |
-| `metadata` | `jsonb` | `{source, chunk_id, document_name, page}` |
-| `embedding` | `vector(384)` | HuggingFace 384-dim embedding |
-| `created_at` | `timestamptz` | Auto-set |
+| Column       | Type          | Description                               |
+| ------------ | ------------- | ----------------------------------------- |
+| `id`         | `uuid`        | Primary key                               |
+| `content`    | `text`        | Chunk text                                |
+| `metadata`   | `jsonb`       | `{source, chunk_id, document_name, page}` |
+| `embedding`  | `vector(384)` | HuggingFace 384-dim embedding             |
+| `created_at` | `timestamptz` | Auto-set                                  |
 
 ### `document_registry`
 
 Master table tracking ingested documents (source, chunk count, timestamp).
 
+### `question_bank`
+
+| Column       | Type          | Description                                                 |
+| ------------ | ------------- | ----------------------------------------------------------- |
+| `id`         | `uuid`        | Primary key                                                 |
+| `question`   | `text`        | Question text                                               |
+| `answer`     | `text`        | Suggested answer to question                                |
+| `metadata`   | `jsonb`       | `{"category":"Payroll Processing"}`                         |
+| `embedding`  | `vector(384)` | HuggingFace 384-dim embedding                               |
+| `created_at` | `timestamptz` | Auto-set                                                    |
+
+
 ---
 
 ## Author
 
-Henry Sylvester — INFO 3601, University of the West Indies, St. Augustine (2026)
-
+Henry Sylvester — INFO 3604, University of the West Indies, St. Augustine (2026)

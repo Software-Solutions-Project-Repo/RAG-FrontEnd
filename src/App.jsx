@@ -5,6 +5,9 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import Documents from './pages/Documents'
 import DocumentForm from './pages/DocumentForm'
+import QuestionBank from './pages/QuestionBank'
+import NewQuestion from './pages/NewQuestion'
+import EditQuestion from './pages/EditQuestion'
 import Search from './pages/Search'
 import ErrorCode from './pages/ErrorCode'
 import AddErrorRow from './pages/AddErrorRow'
@@ -84,6 +87,9 @@ function App() {
           <Route path="documents" element={<Documents />} />
           <Route path="documents/new" element={<DocumentForm />} />
           <Route path="documents/:id/edit" element={<DocumentForm />} />
+          <Route path="question-bank" element={<QuestionBank />} />
+          <Route path="question-bank/new" element={<NewQuestion />} />
+          <Route path="question-bank/:id/edit" element={<EditQuestion />} />
           <Route path="search" element={<Search />} />
           
           <Route path = "/error-codes" element={<ErrorCode/>}/>
