@@ -9,6 +9,8 @@ import QuestionBank from './pages/QuestionBank'
 import NewQuestion from './pages/NewQuestion'
 import EditQuestion from './pages/EditQuestion'
 import Search from './pages/Search'
+import ErrorCode from './pages/ErrorCode'
+import AddErrorRow from './pages/AddErrorRow'
 
 
 function App() {
@@ -89,6 +91,9 @@ function App() {
           <Route path="question-bank/new" element={<NewQuestion />} />
           <Route path="question-bank/:id/edit" element={<EditQuestion />} />
           <Route path="search" element={<Search />} />
+          
+          <Route path = "/error-codes" element={<ErrorCode/>}/>
+           <Route path="/error-codes/new" element={<AddErrorRow />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
