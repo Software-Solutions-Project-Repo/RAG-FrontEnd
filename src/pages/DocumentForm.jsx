@@ -15,6 +15,7 @@ export default function DocumentForm() {
   const [hasEmbedding, setHasEmbedding] = useState(false)
   const [fileName, setFileName] = useState(null)
   const [pdfFile, setPdfFile] = useState(null)
+  const [textFile, setTextFile] = useState(null)
   const [dragOver, setDragOver] = useState(false)
   const [chunks, setChunks] = useState(null)      // preview chunks from /preview
   const [previewing, setPreviewing] = useState(false)
@@ -74,9 +75,33 @@ export default function DocumentForm() {
       }
     } else {
       setPdfFile(null)
-      const reader = new FileReader()
-      reader.onload = (ev) => setContent(ev.target.result ?? '')
-      reader.readAsText(file)
+      const apiBase = import.meta.env.VITE_INGEST_API_URL
+      if (apiBase && (file.name.endsWith('.txt') || file.name.endsWith('.md'))) {
+        setTextFile(file)
+        setContent('')
+        setPreviewing(true)
+        try {
+          const form = new FormData()
+          form.append('file', file)
+          const res = await fetch(`${apiBase}/preview`, { method: 'POST', body: form })
+          if (res.ok) {
+            const data = await res.json()
+            setChunks(data.chunks)
+          } else {
+            const body = await res.json().catch(() => ({}))
+            setError(body.detail ?? 'Preview failed')
+          }
+        } catch {
+          setError('Could not reach the ingest API. Is it running?')
+        } finally {
+          setPreviewing(false)
+        }
+      } else {
+        setTextFile(null)
+        const reader = new FileReader()
+        reader.onload = (ev) => setContent(ev.target.result ?? '')
+        reader.readAsText(file)
+      }
     }
   }
 
@@ -94,6 +119,7 @@ export default function DocumentForm() {
   const handleClearFile = () => {
     setFileName(null)
     setPdfFile(null)
+    setTextFile(null)
     setContent('')
     setChunks(null)
     setEditingIndex(null)
@@ -119,8 +145,8 @@ export default function DocumentForm() {
     setSaving(true)
     setError(null)
 
-    // ── PDF path: POST edited chunks to /ingest-chunks ──────────────────────
-    if (pdfFile) {
+    // ── PDF / text path: POST edited chunks to /ingest-chunks ────────────────
+    if (pdfFile || textFile) {
       const apiBase = import.meta.env.VITE_INGEST_API_URL
       if (!apiBase) {
         setError('VITE_INGEST_API_URL is not set. Add it to your .env file.')
@@ -178,6 +204,7 @@ export default function DocumentForm() {
 
   const fileLoaded = !!fileName
   const isPdf = !!pdfFile
+  const isIngestFile = isPdf || !!textFile
 
   return (
     <div className="p-8 max-w-3xl">
@@ -290,8 +317,8 @@ export default function DocumentForm() {
               </div>
             )}
 
-            {/* PDF chunk preview */}
-            {isPdf && (
+            {/* PDF / text chunk preview */}
+            {isIngestFile && (
               <div>
                 {previewing && (
                   <div className="flex items-center gap-2 text-sm text-slate-500 py-4">
@@ -367,7 +394,7 @@ export default function DocumentForm() {
             )}
 
             {/* Text content preview */}
-            {!isPdf && (
+            {!isIngestFile && (
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-sm font-medium text-slate-700">Extracted Content Preview</label>
@@ -399,14 +426,14 @@ export default function DocumentForm() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  {isPdf ? 'Ingesting…' : 'Saving…'}
+                  {isIngestFile ? 'Ingesting…' : 'Saving…'}
                 </>
               ) : (
                 <>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
-                  {isPdf ? 'Ingest PDF' : isEdit ? 'Save Changes' : 'Save to Database'}
+                  {isIngestFile ? (isPdf ? 'Ingest PDF' : 'Ingest Document') : isEdit ? 'Save Changes' : 'Save to Database'}
                 </>
               )}
             </button>
