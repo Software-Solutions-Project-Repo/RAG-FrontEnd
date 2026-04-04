@@ -6,11 +6,6 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.vectorstores import SupabaseVectorStore
-from langchain_core.documents import Document
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from supabase import create_client
 
 load_dotenv()
@@ -83,6 +78,10 @@ async def preview(
     if not is_pdf and not is_text:
         raise HTTPException(status_code=415, detail="Only PDF, .txt, and .md files are supported")
 
+    from langchain_core.documents import Document
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from langchain_community.document_loaders import PyPDFLoader
+
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
@@ -142,6 +141,12 @@ async def ingest(
     )
     if not is_pdf:
         raise HTTPException(status_code=415, detail="Only PDF files are supported")
+
+    from langchain_core.documents import Document
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from langchain_community.document_loaders import PyPDFLoader
+    from langchain_community.vectorstores import SupabaseVectorStore
+    from langchain_huggingface import HuggingFaceEmbeddings
 
     table_name = DOCUMENTS_TABLE
     document_name = file.filename or "upload.pdf"
@@ -218,6 +223,10 @@ async def ingest_chunks(
 
     if not chunk_list:
         raise HTTPException(status_code=422, detail="No chunks provided")
+
+    from langchain_core.documents import Document
+    from langchain_community.vectorstores import SupabaseVectorStore
+    from langchain_huggingface import HuggingFaceEmbeddings
 
     docs_for_store = [
         Document(
