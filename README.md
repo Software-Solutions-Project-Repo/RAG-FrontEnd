@@ -94,7 +94,7 @@ Runs at `http://localhost:5173`.
 
 ```bash
 pip install -r requirements.txt
-c:/python314/python.exe -m uvicorn main:app --reload --port 8000
+python -m uvicorn main:app --reload --port 8000
 ```
 
 Confirm it's running:
