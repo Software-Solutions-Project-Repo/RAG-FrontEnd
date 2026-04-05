@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from supabase import create_client
 
 load_dotenv()
@@ -263,4 +264,97 @@ async def ingest_chunks(
         "inserted": len(docs_for_store),
         "table": DOCUMENTS_TABLE,
         "source": document_name,
+    }
+
+@app.post("/embed-question")
+async def embed_question(payload: dict):
+    """
+    Embed a single question + answer and store in Supabase question_bank table
+    """
+
+    question = payload.get("question")
+    answer = payload.get("answer")
+    metadata = payload.get("metadata", {})
+    row_id = payload.get("id")
+
+    if not question or not answer:
+        raise HTTPException(status_code=400, detail="Missing question or answer")
+
+    text = f"""
+Category: {metadata} 
+
+Question: 
+{question}
+
+Answer: 
+{answer}
+"""
+
+    print("Generating embeddings...")
+    
+    try:
+        embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)
+        vector = embeddings.embed_query(text)  
+        print("Embedding length: ", len(vector))  
+
+        supabase = _supabase_client()
+        print("Updating row: ", row_id)
+
+        response = supabase.table("question_bank").update({
+            "embedding": vector
+        }).eq("id", row_id).execute()
+
+    except Exception as e:
+        print("ERROR: ", str(e))
+        raise HTTPException(status_code=500, detail=f"Embedding/Database error: {str(e)}")
+    
+    return{
+        "status": "embedded",
+        "id": row_id
+    }
+
+@app.post("/embed-missing-questions")
+async def embed_missing_questions():
+    """
+    Generate embeddings for rows missing embeddings
+    """
+
+    supabase = _supabase_client()
+
+    rows = (
+        supabase.table("question_bank").select("*").is_("embedding", "null").execute()
+    )
+
+    data = rows.data or []
+
+    if not data:
+        return {"embedded": 0}
+
+
+    for row in data:
+        text = f"""
+Category: {row.get('metadata')}
+
+Question:
+{row.get('question')}
+
+Answer:
+{row.get('answer')}
+"""
+    print("Generating embeddings...")
+    
+    try:
+        embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)    
+        vector = embeddings.embed_query(text)
+
+        response = supabase.table("question_bank").update({
+            "embedding": vector
+        }).eq("id", row["id"]).execute()
+    
+    except Exception as e:
+        print("ERROR: ", str(e))
+        raise HTTPException(status_code=500, detail=f"Embedding/Database error: {str(e)}")
+
+    return{
+        "embedded": len(data)
     }

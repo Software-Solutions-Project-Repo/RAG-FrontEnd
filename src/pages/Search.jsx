@@ -4,6 +4,26 @@ import { supabase } from '../lib/supabase'
 
 const LS_FN_KEY = 'rag_edge_function_name'
 
+const SOURCES = [
+  { key: 'documents', label: 'Documents' },
+  { key: 'questions', label: 'Questions' },
+  { key: 'error_codes', label: 'Error Codes' },
+]
+
+function SourceBadge({ source }) {
+  const styles = {
+    documents: 'bg-slate-100 text-slate-600',
+    questions: 'bg-indigo-100 text-indigo-700',
+    error_codes: 'bg-rose-100 text-rose-700',
+  }
+  const labels = { documents: 'Document', questions: 'Question', error_codes: 'Error Code' }
+  return (
+    <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${styles[source]}`}>
+      {labels[source]}
+    </span>
+  )
+}
+
 function SimilarityBadge({ score }) {
   const pct = Math.round(score * 100)
   const color =
@@ -20,6 +40,7 @@ function SimilarityBadge({ score }) {
 export default function Search() {
   const navigate = useNavigate()
   const [mode, setMode] = useState('text') // 'text' | 'semantic'
+  const [source, setSource] = useState('documents') // 'documents' | 'questions' | 'error_codes'
   const [query, setQuery] = useState('')
   const [matchCount, setMatchCount] = useState(5)
   const [metaFilter, setMetaFilter] = useState('{}')
@@ -42,14 +63,36 @@ export default function Search() {
     setError(null)
     setResults(null)
 
-    const { data, error } = await supabase
-      .from('documents')
-      .select('id, content, metadata, created_at')
-      .ilike('content', `%${query}%`)
-      .limit(matchCount)
+    const term = `%${query}%`
 
-    if (error) setError(error.message)
-    else setResults(data ?? [])
+    if (source === 'documents') {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('id, content, metadata, created_at')
+        .ilike('content', term)
+        .limit(matchCount)
+      if (error) setError(error.message)
+      else setResults((data ?? []).map(r => ({ ...r, _source: 'documents' })))
+
+    } else if (source === 'questions') {
+      const { data, error } = await supabase
+        .from('question_bank')
+        .select('id, question, answer, metadata, created_at')
+        .or(`question.ilike.${term},answer.ilike.${term}`)
+        .limit(matchCount)
+      if (error) setError(error.message)
+      else setResults((data ?? []).map(r => ({ ...r, _source: 'questions' })))
+
+    } else if (source === 'error_codes') {
+      const { data, error } = await supabase
+        .from('error_code_qa')
+        .select('id, question, answer, created_at, error_codes(id, error_code, description)')
+        .or(`question.ilike.${term},answer.ilike.${term}`)
+        .limit(matchCount)
+      if (error) setError(error.message)
+      else setResults((data ?? []).map(r => ({ ...r, _source: 'error_codes' })))
+    }
+
     setLoading(false)
   }
 
@@ -77,7 +120,7 @@ export default function Search() {
     })
 
     if (error) setError(error.message)
-    else setResults(Array.isArray(data) ? data : [])
+    else setResults((Array.isArray(data) ? data : []).map(r => ({ ...r, _source: 'documents' })))
     setLoading(false)
   }
 
@@ -91,6 +134,8 @@ export default function Search() {
     setResults(null)
     setError(null)
   }
+
+  const totalCount = results?.length ?? 0
 
   return (
     <div className="p-8 max-w-4xl">
@@ -148,23 +193,44 @@ export default function Search() {
       )}
 
       {/* Mode tabs */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit mb-5">
-        {[
-          { key: 'text', label: 'Text Search' },
-          { key: 'semantic', label: 'Semantic Search' },
-        ].map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => { setMode(key); resetSearch() }}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              mode === key
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex gap-4 mb-5">
+        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+          {[
+            { key: 'text', label: 'Text Search' },
+            { key: 'semantic', label: 'Semantic Search' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => { setMode(key); resetSearch() }}
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                mode === key
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Source tabs — shown only for text search */}
+        {mode === 'text' && (
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+            {SOURCES.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => { setSource(key); resetSearch() }}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  source === key
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Search form */}
@@ -178,7 +244,7 @@ export default function Search() {
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder={
                 mode === 'text'
-                  ? 'Search document content…'
+                  ? 'Search content…'
                   : 'Describe what you\'re looking for…'
               }
               className="flex-1 px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -260,47 +326,94 @@ export default function Search() {
       {results !== null && (
         <div>
           <p className="text-sm text-slate-500 mb-4">
-            {results.length === 0
-              ? 'No documents matched your query.'
-              : `${results.length} result${results.length !== 1 ? 's' : ''} found`
+            {totalCount === 0
+              ? 'No results matched your query.'
+              : `${totalCount} result${totalCount !== 1 ? 's' : ''} found`
             }
           </p>
           <div className="space-y-3">
-            {results.map((doc) => (
-              <div key={doc.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-indigo-200 transition-colors">
+            {results.map((item) => (
+              <div key={item.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-indigo-200 transition-colors">
                 <div className="flex items-start justify-between gap-4 mb-3">
-                  <button
-                    onClick={() => navigate(`/documents/${doc.id}/edit`)}
-                    className="font-mono text-xs text-slate-400 hover:text-indigo-600 transition-colors"
-                    title="Open in editor"
-                  >
-                    {doc.id}
-                  </button>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {doc.similarity !== undefined && (
-                      <SimilarityBadge score={doc.similarity} />
+                  <div className="flex items-center gap-2 min-w-0">
+                    <SourceBadge source={item._source} />
+                    {item._source === 'error_codes' && item.error_codes && (
+                      <span className="font-mono text-xs font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded">
+                        {item.error_codes.error_code}
+                      </span>
                     )}
-                    <button
-                      onClick={() => navigate(`/documents/${doc.id}/edit`)}
-                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                      title="Edit document"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
+                    <span className="font-mono text-xs text-slate-400 truncate">{item.id}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {item.similarity !== undefined && (
+                      <SimilarityBadge score={item.similarity} />
+                    )}
+                    {item._source === 'documents' && (
+                      <button
+                        onClick={() => navigate(`/documents/${item.id}/edit`)}
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        title="Edit document"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    )}
+                    {item._source === 'questions' && (
+                      <button
+                        onClick={() => navigate(`/question-bank/${item.id}/edit`)}
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        title="Edit question"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
-                <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap line-clamp-5">
-                  {doc.content}
-                </p>
-                {doc.metadata && Object.keys(doc.metadata).length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {Object.entries(doc.metadata).map(([k, v]) => (
-                      <span key={k} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">
-                        <span className="font-medium">{k}</span>: {String(v)}
-                      </span>
-                    ))}
+
+                {/* Document result */}
+                {item._source === 'documents' && (
+                  <>
+                    <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap line-clamp-5">
+                      {item.content}
+                    </p>
+                    {item.metadata && Object.keys(item.metadata).length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {Object.entries(item.metadata).map(([k, v]) => (
+                          <span key={k} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">
+                            <span className="font-medium">{k}</span>: {String(v)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Question / Error Code result */}
+                {(item._source === 'questions' || item._source === 'error_codes') && (
+                  <div className="space-y-2">
+                    {item._source === 'error_codes' && item.error_codes?.description && (
+                      <p className="text-xs text-slate-500 italic">{item.error_codes.description}</p>
+                    )}
+                    <div>
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Q</span>
+                      <p className="text-sm text-slate-800 leading-relaxed mt-0.5">{item.question}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">A</span>
+                      <p className="text-sm text-slate-600 leading-relaxed mt-0.5 line-clamp-4">{item.answer}</p>
+                    </div>
+                    {item._source === 'questions' && item.metadata && Object.keys(item.metadata).length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {Object.entries(item.metadata).map(([k, v]) => (
+                          <span key={k} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">
+                            <span className="font-medium">{k}</span>: {String(v)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { embedQuestion } from '../lib/embeddings'
 
 export default function NewQuestion() {
   const navigate = useNavigate()
@@ -44,11 +43,10 @@ export default function NewQuestion() {
     if (error) {
       setError(error.message)
     } else {
-      await embedQuestion({
-        id: data.id,
-        question,
-        answer,
-        metadata: parsedMetadata
+      await fetch('http://localhost:8000/embed-question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: data.id, question, answer, metadata: parsedMetadata })
       })
 
       navigate('/question-bank')

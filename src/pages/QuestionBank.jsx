@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { embedMissingQuestions } from '../lib/embeddings'
 import ConfirmModal from '../components/ConfirmModal'
 
 const PAGE_SIZE = 20
@@ -121,7 +120,7 @@ export default function QuestionBank() {
           </button>
           <button
             onClick={async () => {
-              await embedMissingQuestions()
+              await fetch('http://localhost:8000/embed-missing-questions', { method: 'POST' })
               fetchQuestions()
             }}
             className="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm shadow-indigo-200"
