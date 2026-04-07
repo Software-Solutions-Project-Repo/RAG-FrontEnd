@@ -313,6 +313,51 @@ Answer:
         "id": row_id
     }
 
+@app.post("/embed-error")
+async def embed_error(payload: dict):
+    """
+    Embed a single error code Q&A and store the vector in the error_code_qa row.
+    Expects: { id, error_code, description, question, answer }
+    """
+    row_id = payload.get("id")
+    error_code = payload.get("error_code", "")
+    description = payload.get("description", "")
+    question = payload.get("question")
+    answer = payload.get("answer")
+
+    if not row_id or not question or not answer:
+        raise HTTPException(status_code=400, detail="Missing id, question, or answer")
+
+    text = f"""
+Error Code: {error_code}
+Category: {description}
+
+Question:
+{question}
+
+Answer:
+{answer}
+"""
+
+    print("Generating embedding for error code row:", row_id)
+
+    try:
+        embeddings = HuggingFaceEmbeddings(model_name=DEFAULT_MODEL)
+        vector = embeddings.embed_query(text)
+        print("Embedding length:", len(vector))
+
+        supabase = _supabase_client()
+        supabase.table("error_code_qa").update({
+            "embedding": vector
+        }).eq("id", row_id).execute()
+
+    except Exception as e:
+        print("ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=f"Embedding/Database error: {str(e)}")
+
+    return {"status": "embedded", "id": row_id}
+
+
 @app.post("/embed-missing-questions")
 async def embed_missing_questions():
     """

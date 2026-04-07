@@ -10,7 +10,7 @@ import NewQuestion from './pages/NewQuestion'
 import EditQuestion from './pages/EditQuestion'
 import Search from './pages/Search'
 import ErrorCode from './pages/ErrorCode'
-import AddErrorRow from './pages/AddErrorRow'
+import AddErrorCode from './pages/AddErrorCode'
 
 
 function App() {
@@ -92,8 +92,9 @@ function App() {
           <Route path="question-bank/:id/edit" element={<EditQuestion />} />
           <Route path="search" element={<Search />} />
           
-          <Route path = "/error-codes" element={<ErrorCode/>}/>
-           <Route path="/error-codes/new" element={<AddErrorRow />} />
+          <Route path="/error-codes" element={<ErrorCode />} />
+          <Route path="/error-codes/new" element={<AddErrorCode />} />
+          <Route path="/error-codes/:id/edit" element={<AddErrorCode />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
