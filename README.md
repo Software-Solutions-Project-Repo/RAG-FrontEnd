@@ -38,7 +38,8 @@ The admin panel replaces `populate_database.py` for day-to-day document manageme
 ```
 ├── main.py                  # FastAPI ingest server
 ├── requirements.txt         # Python dependencies
-├── populate_database.py     # Reference CLI ingestion script
+├── public/
+│   └── favicon.ico          # App favicon
 ├── src/
 │   ├── App.jsx              # Routes + auth gate
 │   ├── main.jsx
@@ -52,10 +53,11 @@ The admin panel replaces `populate_database.py` for day-to-day document manageme
 │   │   ├── QuestionBank.jsx # List of Common Questions and Suggested Answers
 │   │   ├── NewQuestion.jsx  # Add new questions and preview
 │   │   ├── EditQuestion.jsx # Edit Questions + regenerate embeddings automatically
+│   │   ├── ErrorCode.jsx    # Error Code Manager table
+│   │   ├── AddErrorCode.jsx # Add / Edit error code entry
 │   │   ├── Search.jsx       # Semantic search UI
 │   │   └── Login.jsx
 │   └── lib/
-│       ├── embeddings.js    # Embedding function
 │       └── supabase.js      # Supabase client
 ```
 
@@ -115,7 +117,8 @@ curl http://localhost:8000/health
 | `POST` | `/ingest`                  | Full pipeline: chunk → embed → save to Supabase       |
 | `POST` | `/ingest-chunks`           | Embed and save pre-edited chunks (skips re-chunking)  |
 | `POST` | `/embed-question`          | Embed and save question + suggested answer to Supabase|
-| `POST` | `/embed-missing-questions` | Regenerate missing embeddings                           |
+| `POST` | `/embed-missing-questions` | Regenerate missing embeddings                         |
+| `POST` | `/embed-error`             | Embed and save an error code Q&A entry to Supabase    |
 
 ### `/preview` — request
 
@@ -165,6 +168,17 @@ chunks: "[{\"index\": 0, \"page\": 0, \"text\": \"...\"}]"
    - `Metadata (optional)` `(e.g. {'category':'Payroll Processing'} ) `
 3. Click **Create Question** to upload question to Supabase.
 
+## Error Code Upload Flow
+
+1. Click **+ Add Error** from the Error Code Manager table.
+2. Fill out all necessary fields:
+   - `Error Code` (e.g. `ERR001`)
+   - `Category / Description` (optional)
+   - `Question`
+   - `Answer`
+3. Click **Add Error Code** — the entry is saved to Supabase and an embedding is generated via `/embed-error`.
+4. To edit an existing entry, hover the row and click **Edit** — changes are saved and the embedding is regenerated.
+
 ## Supabase Tables
 
 These tables are shared with the RAG backend — any documents uploaded here are immediately available to the chatbot (`LLM.py`).
@@ -193,6 +207,25 @@ Master table tracking ingested documents (source, chunk count, timestamp).
 | `metadata`   | `jsonb`       | `{"category":"Payroll Processing"}`                         |
 | `embedding`  | `vector(384)` | HuggingFace 384-dim embedding                               |
 | `created_at` | `timestamptz` | Auto-set                                                    |
+
+### `error_codes`
+
+| Column        | Type          | Description                          |
+| ------------- | ------------- | ------------------------------------ |
+| `id`          | `uuid`        | Primary key                          |
+| `error_code`  | `text`        | Error code identifier (e.g. `ERR001`)|
+| `description` | `text`        | Category / description               |
+
+### `error_code_qa`
+
+| Column          | Type          | Description                              |
+| --------------- | ------------- | ---------------------------------------- |
+| `id`            | `uuid`        | Primary key                              |
+| `error_code_id` | `uuid`        | FK → `error_codes.id`                    |
+| `question`      | `text`        | Question text                            |
+| `answer`        | `text`        | Answer text                              |
+| `embedding`     | `vector(384)` | HuggingFace 384-dim embedding            |
+| `created_at`    | `timestamptz` | Auto-set                                 |
 
 
 ---

@@ -23,11 +23,11 @@ export default function Layout({ session }) {
         {/* Logo */}
         <div className="p-5 border-b border-slate-200">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
-              <svg className="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
+            <img
+              src="https://cguzaxwlyyyjudqllchm.supabase.co/storage/v1/object/public/Images/Picture1-removebg-preview.svg"
+              alt="PowPay logo"
+              className="h-8 w-auto shrink-0"
+            />
             <div>
               <span className="text-slate-900 font-semibold text-sm">RAG Manager</span>
               <p className="text-xs text-slate-400 leading-tight">Document Store</p>
