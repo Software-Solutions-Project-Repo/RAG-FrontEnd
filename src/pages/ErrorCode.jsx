@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import ConfirmModal from '../components/ConfirmModal'
 
 function EmbeddingBadge({ hasEmbedding }) {
   return hasEmbedding ? (
@@ -18,6 +19,8 @@ function ErrorManager() {
   const navigate = useNavigate()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   const fetchData = async () => {
     setLoading(true)
@@ -37,14 +40,15 @@ function ErrorManager() {
     fetchData()
   }, [])
 
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this?')) return
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
 
     try {
       const { data, error: fetchError } = await supabase
         .from('error_code_qa')
         .select('error_code_id')
-        .eq('id', id)
+        .eq('id', deleteTarget.id)
         .single()
 
       if (fetchError) throw fetchError
@@ -54,7 +58,7 @@ function ErrorManager() {
       const { error: qaError } = await supabase
         .from('error_code_qa')
         .delete()
-        .eq('id', id)
+        .eq('id', deleteTarget.id)
 
       if (qaError) throw qaError
 
@@ -65,10 +69,13 @@ function ErrorManager() {
 
       if (codeError) throw codeError
 
+      setDeleteTarget(null)
       fetchData()
     } catch (err) {
       console.error(err)
       alert('Delete failed')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -131,7 +138,7 @@ function ErrorManager() {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(row.id)}
+                        onClick={() => setDeleteTarget(row)}
                         className="text-xs text-red-500 hover:underline font-medium"
                       >
                         Delete
@@ -144,6 +151,15 @@ function ErrorManager() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete Error Code"
+        message={`Are you sure you want to delete error code "${deleteTarget?.error_codes?.error_code ?? ''}"? This cannot be undone.`}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+        confirmLabel={deleting ? 'Deleting…' : 'Delete'}
+      />
     </div>
   )
 }
