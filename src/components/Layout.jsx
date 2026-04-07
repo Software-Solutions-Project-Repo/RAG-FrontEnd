@@ -24,7 +24,7 @@ export default function Layout({ session }) {
         <div className="p-5 border-b border-slate-200">
           <div className="flex items-center gap-2.5">
             <img
-              src="https://cguzaxwlyyyjudqllchm.supabase.co/storage/v1/object/public/Images/Picture1-removebg-preview.svg"
+              src="https://cguzaxwlyyyjudqllchm.supabase.co/storage/v1/object/public/Images/Logo.svg"
               alt="PowPay logo"
               className="h-8 w-auto shrink-0"
             />
