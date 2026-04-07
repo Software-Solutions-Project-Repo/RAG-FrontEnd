@@ -263,17 +263,17 @@ export default function DocumentForm() {
             onClick={() => fileInputRef.current?.click()}
             className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-2xl p-14 cursor-pointer transition-colors ${
               dragOver
-                ? 'border-indigo-400 bg-indigo-50'
-                : 'border-slate-300 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40'
+                ? 'border-[#006064] bg-[#006064]/5'
+                : 'border-slate-300 bg-slate-50 hover:border-[#006064]/40 hover:bg-[#006064]/5'
             }`}
           >
-            <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
-              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full bg-[#006064]/10 flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#006064]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-slate-700">Drop a file here, or <span className="text-indigo-600">browse</span></p>
+              <p className="text-sm font-semibold text-slate-700">Drop a file here, or <span className="text-[#006064]">browse</span></p>
               <p className="text-xs text-slate-400 mt-1">Supported formats: .pdf · .txt · .md · .csv · .json</p>
             </div>
             <input
@@ -322,7 +322,7 @@ export default function DocumentForm() {
               <div>
                 {previewing && (
                   <div className="flex items-center gap-2 text-sm text-slate-500 py-4">
-                    <svg className="animate-spin w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin w-4 h-4 text-[#006064]" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
@@ -357,7 +357,7 @@ export default function DocumentForm() {
                               ) : (
                                 <>
                                   <button type="button" onClick={() => handleStartEdit(chunk)}
-                                    className="text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors">
+                                    className="text-xs text-[#006064] hover:text-[#004d50] font-medium transition-colors">
                                     Edit
                                   </button>
                                   <button type="button" onClick={() => handleDeleteChunk(chunk.index)}
@@ -374,7 +374,7 @@ export default function DocumentForm() {
                               onChange={(e) => setEditingText(e.target.value)}
                               rows={6}
                               autoFocus
-                              className="w-full px-3 py-2.5 text-xs font-mono text-slate-700 leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                              className="w-full px-3 py-2.5 text-xs font-mono text-slate-700 leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-[#006064]"
                             />
                           ) : (
                             <p className="px-3 py-2.5 text-xs font-mono text-slate-600 leading-relaxed whitespace-pre-wrap">{chunk.text}</p>
@@ -404,7 +404,7 @@ export default function DocumentForm() {
                   value={content}
                   readOnly
                   rows={18}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-slate-50 text-slate-600 font-mono leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-default"
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-slate-50 text-slate-600 font-mono leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-[#006064] cursor-default"
                 />
                 <p className="mt-1.5 text-xs text-slate-400">Read-only preview. Review the content above before saving to the database.</p>
               </div>
@@ -418,7 +418,7 @@ export default function DocumentForm() {
             <button
               type="submit"
               disabled={saving || !fileLoaded || previewing}
-              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-semibold rounded-xl transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#006064] hover:bg-[#004d50] disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
             >
               {saving ? (
                 <>

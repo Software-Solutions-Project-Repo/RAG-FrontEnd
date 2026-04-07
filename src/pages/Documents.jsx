@@ -104,7 +104,7 @@ export default function Documents() {
         </div>
         <button
           onClick={() => navigate('/documents/new')}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm shadow-indigo-200"
+          className="flex items-center gap-2 px-4 py-2 bg-[#006064] hover:bg-[#004d50] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -138,7 +138,7 @@ export default function Documents() {
           <p className="text-sm text-slate-400 mb-5">Upload your first document to get started</p>
           <button
             onClick={() => navigate('/documents/new')}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="px-4 py-2 bg-[#006064] hover:bg-[#004d50] text-white text-sm font-semibold rounded-xl transition-colors"
           >
             Create Document
           </button>
@@ -164,7 +164,7 @@ export default function Documents() {
                       <button
                         onClick={() => copyId(doc.id)}
                         title="Click to copy full ID"
-                        className="font-mono text-xs text-slate-400 hover:text-indigo-600 transition-colors text-left"
+                        className="font-mono text-xs text-slate-400 hover:text-[#006064] transition-colors text-left"
                       >
                         {copiedId === doc.id ? (
                           <span className="text-green-600">Copied!</span>
@@ -213,7 +213,7 @@ export default function Documents() {
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => navigate(`/documents/${doc.id}/edit`)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-[#006064] hover:bg-[#006064]/5 rounded-lg transition-colors"
                           title="Edit"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

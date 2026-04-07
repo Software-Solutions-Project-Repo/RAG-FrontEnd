@@ -81,7 +81,7 @@ function ErrorManager() {
         </div>
         <button
           onClick={() => navigate('/error-codes/new')}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-[#006064] hover:bg-[#004d50] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
         >
           + Add Error
         </button>
@@ -126,7 +126,7 @@ function ErrorManager() {
                     <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition">
                       <button
                         onClick={() => navigate(`/error-codes/${row.id}/edit`)}
-                        className="text-xs text-indigo-600 hover:underline font-medium"
+                        className="text-xs text-[#006064] hover:underline font-medium"
                       >
                         Edit
                       </button>

@@ -13,7 +13,7 @@ const SOURCES = [
 function SourceBadge({ source }) {
   const styles = {
     documents: 'bg-slate-100 text-slate-600',
-    questions: 'bg-indigo-100 text-indigo-700',
+    questions: 'bg-[#006064]/10 text-[#006064]',
     error_codes: 'bg-rose-100 text-rose-700',
   }
   const labels = { documents: 'Document', questions: 'Question', error_codes: 'Error Code' }
@@ -28,7 +28,7 @@ function SimilarityBadge({ score }) {
   const pct = Math.round(score * 100)
   const color =
     score >= 0.8 ? 'bg-green-100 text-green-700' :
-    score >= 0.6 ? 'bg-blue-100 text-blue-700' :
+    score >= 0.6 ? 'bg-[#FFB300]/20 text-[#b37e00]' :
                    'bg-slate-100 text-slate-600'
   return (
     <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${color}`}>
@@ -149,7 +149,7 @@ export default function Search() {
           onClick={() => setShowSettings(s => !s)}
           className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border transition-colors ${
             showSettings
-              ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+              ? 'bg-[#006064]/10 text-[#006064] border-[#006064]/20'
               : 'text-slate-600 border-slate-200 hover:bg-white'
           }`}
         >
@@ -180,7 +180,7 @@ export default function Search() {
               value={functionName}
               onChange={(e) => saveFunctionName(e.target.value)}
               placeholder="e.g. search-documents"
-              className="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#006064]"
             />
           </div>
           {functionName && (
@@ -247,13 +247,13 @@ export default function Search() {
                   ? 'Search content…'
                   : 'Describe what you\'re looking for…'
               }
-              className="flex-1 px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#006064]"
               autoFocus
             />
             <button
               onClick={handleSearch}
               disabled={loading || !query.trim()}
-              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-semibold rounded-xl transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#006064] hover:bg-[#004d50] disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
             >
               {loading ? (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -275,7 +275,7 @@ export default function Search() {
               <select
                 value={matchCount}
                 onChange={(e) => setMatchCount(Number(e.target.value))}
-                className="px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#006064]"
               >
                 {[5, 10, 15, 20].map(n => (
                   <option key={n} value={n}>{n} results</option>
@@ -293,7 +293,7 @@ export default function Search() {
                   value={metaFilter}
                   onChange={(e) => { setMetaFilter(e.target.value); setMetaFilterError(null) }}
                   placeholder='e.g. {"source": "wiki"}'
-                  className={`w-full px-3 py-2 border rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  className={`w-full px-3 py-2 border rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#006064] ${
                     metaFilterError ? 'border-red-300 bg-red-50' : 'border-slate-300'
                   }`}
                 />
@@ -333,7 +333,7 @@ export default function Search() {
           </p>
           <div className="space-y-3">
             {results.map((item) => (
-              <div key={item.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-indigo-200 transition-colors">
+              <div key={item.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-[#006064]/30 transition-colors">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex items-center gap-2 min-w-0">
                     <SourceBadge source={item._source} />
@@ -351,7 +351,7 @@ export default function Search() {
                     {item._source === 'documents' && (
                       <button
                         onClick={() => navigate(`/documents/${item.id}/edit`)}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-[#006064] hover:bg-[#006064]/5 rounded-lg transition-colors"
                         title="Edit document"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,7 +362,7 @@ export default function Search() {
                     {item._source === 'questions' && (
                       <button
                         onClick={() => navigate(`/question-bank/${item.id}/edit`)}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-[#006064] hover:bg-[#006064]/5 rounded-lg transition-colors"
                         title="Edit question"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

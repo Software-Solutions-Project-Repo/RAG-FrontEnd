@@ -149,7 +149,7 @@ export default function AddErrorCode() {
             <input
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#006064]"
               placeholder="E.g. ERR001"
               required
             />
@@ -159,7 +159,7 @@ export default function AddErrorCode() {
             <input
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#006064]"
               placeholder="E.g. Network Error"
             />
           </div>
@@ -170,7 +170,7 @@ export default function AddErrorCode() {
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#006064]"
             rows={3}
             required
           />
@@ -181,7 +181,7 @@ export default function AddErrorCode() {
           <textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#006064]"
             rows={6}
             required
           />
@@ -191,7 +191,7 @@ export default function AddErrorCode() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#006064] hover:bg-[#004d50] disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             {saving ? (
               <>

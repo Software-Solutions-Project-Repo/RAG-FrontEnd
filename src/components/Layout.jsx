@@ -12,7 +12,7 @@ export default function Layout({ session }) {
   const navLinkClass = ({ isActive }) =>
     `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
       isActive
-        ? 'bg-indigo-50 text-indigo-700'
+        ? 'bg-[#006064]/10 text-[#006064]'
         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
     }`
 
@@ -66,7 +66,7 @@ export default function Layout({ session }) {
         {/* User / Sign Out */}
         <div className="p-4 border-t border-slate-200">
           <div className="flex items-center gap-3 mb-3 px-1">
-            <div className="w-7 h-7 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 text-xs font-semibold shrink-0">
+            <div className="w-7 h-7 bg-[#006064]/10 rounded-full flex items-center justify-center text-[#006064] text-xs font-semibold shrink-0">
               {session.user.email?.[0]?.toUpperCase() ?? 'U'}
             </div>
             <p className="text-xs text-slate-600 truncate flex-1">{session.user.email}</p>

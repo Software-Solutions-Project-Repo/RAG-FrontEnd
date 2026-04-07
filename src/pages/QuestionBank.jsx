@@ -111,7 +111,7 @@ export default function QuestionBank() {
         <div className="flex gap-2">
           <button
             onClick={() => navigate('/question-bank/new')}
-            className="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm shadow-indigo-200"
+            className="flex items-center px-4 py-2 bg-[#006064] hover:bg-[#004d50] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -123,7 +123,7 @@ export default function QuestionBank() {
               await fetch('http://localhost:8000/embed-missing-questions', { method: 'POST' })
               fetchQuestions()
             }}
-            className="flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm shadow-indigo-200"
+            className="flex items-center px-4 py-2 bg-[#FFB300] hover:bg-[#e6a000] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -144,7 +144,7 @@ export default function QuestionBank() {
           </h3>
           <button
             onClick={() => navigate('/questions/new')}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-xl"
+            className="px-4 py-2 bg-[#006064] hover:bg-[#004d50] text-white rounded-xl transition-colors"
           >
             Add Question
           </button>
@@ -197,6 +197,7 @@ export default function QuestionBank() {
                           onClick={() =>
                             navigate(`/question-bank/${q.id}/edit`)
                           }
+                          className="text-[#006064] hover:underline text-xs font-medium"
                         >
                           Edit
                         </button>

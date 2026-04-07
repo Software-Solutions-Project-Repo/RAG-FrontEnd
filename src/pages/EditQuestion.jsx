@@ -138,7 +138,7 @@ export default function EditQuestion() {
           <button
             type="submit"
             disabled={saving}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-xl"
+            className="px-4 py-2 bg-[#006064] hover:bg-[#004d50] text-white rounded-xl transition-colors"
           >
             {saving ? 'Saving…' : 'Update Question'}
           </button>

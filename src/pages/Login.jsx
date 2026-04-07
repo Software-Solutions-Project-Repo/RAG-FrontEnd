@@ -37,7 +37,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Brand */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
+          <div className="w-14 h-14 bg-[#006064] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -81,7 +81,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#006064] focus:border-transparent transition-shadow"
                 placeholder="you@example.com"
               />
             </div>
@@ -96,7 +96,7 @@ export default function Login() {
                 required
                 minLength={6}
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#006064] focus:border-transparent transition-shadow"
                 placeholder="••••••••"
               />
               {mode === 'signup' && (
@@ -106,7 +106,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-sm font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="w-full py-2.5 px-4 bg-[#006064] hover:bg-[#004d50] disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#006064] focus:ring-offset-2"
             >
               {loading
                 ? 'Please wait…'
@@ -121,7 +121,7 @@ export default function Login() {
                 Don't have an account?{' '}
                 <button
                   onClick={() => { setMode('signup'); resetStatus() }}
-                  className="text-indigo-600 hover:text-indigo-800 font-medium"
+                  className="text-[#006064] hover:text-[#004d50] font-medium"
                 >
                   Sign up
                 </button>
@@ -131,7 +131,7 @@ export default function Login() {
                 Already have an account?{' '}
                 <button
                   onClick={() => { setMode('login'); resetStatus() }}
-                  className="text-indigo-600 hover:text-indigo-800 font-medium"
+                  className="text-[#006064] hover:text-[#004d50] font-medium"
                 >
                   Sign in
                 </button>
