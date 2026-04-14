@@ -21,9 +21,12 @@ DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 app = FastAPI(title="RAG Ingest API")
 
+_cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(","),
+    allow_origins=_cors_origins,
+    allow_origin_regex=r"https://rag-front-end.*\.vercel\.app",
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
