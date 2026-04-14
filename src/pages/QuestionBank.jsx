@@ -120,7 +120,8 @@ export default function QuestionBank() {
           </button>
           <button
             onClick={async () => {
-              await fetch('http://localhost:8000/embed-missing-questions', { method: 'POST' })
+              const apiBase = import.meta.env.VITE_INGEST_API_URL
+              if (apiBase) await fetch(`${apiBase}/embed-missing-questions`, { method: 'POST' })
               fetchQuestions()
             }}
             className="flex items-center px-4 py-2 bg-[#FFB300] hover:bg-[#e6a000] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"

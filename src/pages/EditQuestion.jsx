@@ -64,11 +64,14 @@ export default function EditQuestion() {
     if (error) {
       setError(error.message)
     } else {
-      await fetch('http://localhost:8000/embed-question', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, question, answer, metadata: parsedMetadata })
-      })
+      const apiBase = import.meta.env.VITE_INGEST_API_URL
+      if (apiBase) {
+        await fetch(`${apiBase}/embed-question`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, question, answer, metadata: parsedMetadata })
+        })
+      }
 
       navigate('/question-bank')
     }
